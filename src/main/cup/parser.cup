@@ -1,0 +1,71 @@
+package arith.lang;
+
+import java.io.Reader;
+import arith.lang.Compiler.IntExpr;
+import java_cup.runtime.*;
+
+class Parser;
+
+parser code {:
+  public Parser(Reader input) {
+    super(new Lexer(input));
+  }
+:}
+
+/* define how to connect to the scanner! not needed for JFlex Scanners */
+//init with {: s.init(); :};
+//scan with {: return s.nextToken(); :};
+
+/* Terminals (tokens returned by the sanner). */
+terminal Integer INTV;
+terminal TRUE, FALSE, IF, THEN, ELSE, SUCC, PRED, ISZERO;
+terminal SEMI, LPAREN, RPAREN;
+
+/* Non terminal */
+non terminal toplevel, command, term, appterm, aterm; 
+
+/* Precendences 
+precedence left PLUS, MINUS;
+precedence left TIME;
+precedence left UMINUS;
+*/
+
+/* The grammar rules */
+toplevel ::= command SEMI toplevel {: /*let cmd = $1 in
+                                        let cmds = $3 in
+                                        cmd::cmds*/ :}
+                                        ;
+
+command ::= term  {: /*(let t = $1 in Eval(tmInfo t,t))*/ :}
+;
+
+term ::= appterm {: /*$1*/ :}
+  | IF term THEN term ELSE term {: /* TmIf($1, $2, $4, $6) */ :}
+;
+
+appterm ::=
+    aterm
+      {: /* $1 */ :}
+  | SUCC aterm
+      {: /* TmSucc($1, $2) */ :}
+  | PRED aterm
+      {: /* TmPred($1, $2) */ :}
+  | ISZERO aterm
+      {: /* TmIsZero($1, $2) */ :}
+;
+
+/* Atomic terms are ones that never require extra parentheses */
+aterm ::=
+    LPAREN term RPAREN  
+      {: /* $2 */ :} 
+  | TRUE
+      {: /* TmTrue($1) */ :} 
+  | FALSE
+      {: /* TmFalse($1) */ :}
+  | INTV
+      {: /* let rec f n = match n with
+              0 -> TmZero($1.i)
+            | n -> TmSucc($1.i, f (n-1))
+          in f $1.v */ :}
+;
+
