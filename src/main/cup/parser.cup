@@ -1,7 +1,9 @@
 package arith.lang;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.io.Reader;
-import arith.lang.Compiler.IntExpr;
+import arith.lang.Compiler.*;
 import java_cup.runtime.*;
 
 class Parser;
@@ -10,11 +12,15 @@ parser code {:
   public Parser(Reader input) {
     super(new Lexer(input));
   }
+
+  public Term f(int n) { 
+    if(n == 0) { return new TmZero(); }
+    else { return new TmSucc(f(n-1)); }
+  }
+
+  List<Term> commands = new ArrayList<Term>();
 :}
 
-/* define how to connect to the scanner! not needed for JFlex Scanners */
-//init with {: s.init(); :};
-//scan with {: return s.nextToken(); :};
 
 /* Terminals (tokens returned by the sanner). */
 terminal Integer INTV;
@@ -22,48 +28,45 @@ terminal TRUE, FALSE, IF, THEN, ELSE, SUCC, PRED, ISZERO;
 terminal SEMI, LPAREN, RPAREN;
 
 /* Non terminal */
-non terminal toplevel, command, term, appterm, aterm; 
+non terminal command, term, appterm, aterm;
 
-/* Precendences 
-precedence left PLUS, MINUS;
-precedence left TIME;
-precedence left UMINUS;
-*/
 
-/* The grammar rules */
-toplevel ::= command SEMI toplevel {: /*let cmd = $1 in
+/* The grammar rules 
+toplevel ::= command:c SEMI toplevel:cmds {: let cmd = $1 in
                                         let cmds = $3 in
-                                        cmd::cmds*/ :}
+                                        cmd::cmds :}
                                         ;
-
-command ::= term  {: /*(let t = $1 in Eval(tmInfo t,t))*/ :}
+                                        */
+command ::= term:t  {: RESULT = t; /*(let t = $1 in Eval(tmInfo t,t))*/ :}
 ;
 
-term ::= appterm {: /*$1*/ :}
-  | IF term THEN term ELSE term {: /* TmIf($1, $2, $4, $6) */ :}
+term ::= appterm:t {: RESULT = t; :}
+  | IF term:t1 THEN term:t2 ELSE term:t3 
+     {: RESULT = new TmIf((Term)t1, (Term)t2, (Term)t3); :}
 ;
 
 appterm ::=
-    aterm
-      {: /* $1 */ :}
-  | SUCC aterm
-      {: /* TmSucc($1, $2) */ :}
-  | PRED aterm
-      {: /* TmPred($1, $2) */ :}
-  | ISZERO aterm
-      {: /* TmIsZero($1, $2) */ :}
+    aterm:t
+      {: RESULT = t; :}
+  | SUCC aterm:t
+      {: RESULT = new TmSucc((Term)t); :}
+  | PRED aterm:t
+      {: RESULT = new TmPred((Term)t); :}
+  | ISZERO aterm:t
+      {: RESULT = new TmIsZero((Term)t); :}
 ;
 
 /* Atomic terms are ones that never require extra parentheses */
 aterm ::=
-    LPAREN term RPAREN  
-      {: /* $2 */ :} 
+    LPAREN term:t RPAREN  
+      {: RESULT = t; :} 
   | TRUE
-      {: /* TmTrue($1) */ :} 
+      {: RESULT = new TmTrue(); :} 
   | FALSE
-      {: /* TmFalse($1) */ :}
-  | INTV
-      {: /* let rec f n = match n with
+      {: RESULT = new TmFalse(); :}
+  | INTV:i
+      {: RESULT = f(i);
+         /* let rec f n = match n with
               0 -> TmZero($1.i)
             | n -> TmSucc($1.i, f (n-1))
           in f $1.v */ :}

@@ -1,2 +1,2 @@
 #!/bin/bash
-java -cp `cat cp.txt`:target/classes arith.lang.Compiler src/test/resources/test.f
+java -cp `cat cp.txt`:target/classes arith.lang.Compiler src/test/resources/test-one.f
