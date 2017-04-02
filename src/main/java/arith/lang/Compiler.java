@@ -1,5 +1,6 @@
 package arith.lang;
 
+import java.util.LinkedList;
 import java_cup.runtime.Symbol;
 import java.io.FileReader;
 
@@ -122,6 +123,20 @@ public class Compiler {
         public boolean isVal() { return isNumerical(); }
     }
 
+    static class TmTopLevel implements Term {
+        LinkedList<Term> tl;
+        public TmTopLevel(LinkedList<Term> tl) {
+            this.tl = tl;
+        }
+        public Term eval1() {
+            System.out.println(tl.size());
+            return null;
+        }
+        public boolean isNumerical() { return false; }
+        public boolean isVal() { return false; }
+    }
+
+
     public static void printTokens(FileReader r) throws Exception {
         Lexer l = new Lexer(r);
         Symbol s = l.next_token();
@@ -144,14 +159,17 @@ public class Compiler {
     public static void interp(FileReader r) throws Exception {
         Parser p = new Parser(r);
         Symbol s = p.parse();
+//        System.out.println(s);
         Term ast = (Term)s.value;
+        System.out.println(ast);
+        ast.eval1();
        
-        interpTerm(ast);
+    //    interpTerm(ast);
     }
 
     public static void main(String[] args) throws Exception {
         FileReader r = new FileReader(args[0]);
-    //    printTokens(r);
+//        printTokens(r);
         interp(r);
     }
 }

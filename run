@@ -1,2 +1,5 @@
 #!/bin/bash
-java -cp `cat cp.txt`:target/classes arith.lang.Compiler src/test/resources/test-one.f
+#SRC=src/test/resources/test.f
+SRC=$1
+MAIN=arith.lang.Compiler
+java -cp `cat cp.txt`:target/classes $MAIN $SRC

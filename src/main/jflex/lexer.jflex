@@ -21,6 +21,10 @@ import java_cup.runtime.*;
   }
 %}
 
+%eofval{
+    return symbol(sym.EOF);
+%eofval}
+
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 WhiteSpace     = {LineTerminator} | [ \t\f]
@@ -48,8 +52,8 @@ DecIntegerLiteral = 0 | [1-9][0-9]*
   "succ"                { return symbol(sym.SUCC); }
   "pred"                { return symbol(sym.PRED); }
   ";"                { return symbol(sym.SEMI); }
-  "("                { return symbol(sym.RPAREN); }
-  ")"                { return symbol(sym.LPAREN); }
+  "("                { return symbol(sym.LPAREN); }
+  ")"                { return symbol(sym.RPAREN); }
   {DecIntegerLiteral}   { return symbol(sym.INTV, Integer.parseInt(yytext())); }
 
   {Comment}             { /* ignore */ }
