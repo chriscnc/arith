@@ -160,9 +160,9 @@ public class Compiler {
         Parser p = new Parser(r);
         Symbol s = p.parse();
 //        System.out.println(s);
-        Term ast = (Term)s.value;
-        System.out.println(ast);
-        ast.eval1();
+        LinkedList<Term> cmds = (LinkedList)s.value;
+        System.out.println(cmds);
+//        ast.eval1();
        
     //    interpTerm(ast);
     }

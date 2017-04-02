@@ -16,8 +16,6 @@ parser code {:
     if(n == 0) { return new TmZero(); }
     else { return new TmSucc(f(n-1)); }
   }
-
-  LinkedList<Term> commands = new LinkedList<Term>();
 :}
 
 
@@ -27,24 +25,36 @@ terminal TRUE, FALSE, IF, THEN, ELSE, SUCC, PRED, ISZERO;
 terminal SEMI, LPAREN, RPAREN;
 
 /* Non terminal */
-non terminal toplevel, command, term, appterm, aterm;
+non terminal LinkedList<Term> commandlist;
+non terminal command;
+non terminal term, appterm, aterm;
 
 
 /* The grammar rules */
-toplevel ::= command:c SEMI toplevel:cmds {: System.out.println(c);
-                                    commands.addFirst((Term)c);
-                                    RESULT = new TmTopLevel(commands); :}
-  | error:e {: parser.report_error("Syntax error, skipped nonsense", e); :}
+commandlist ::= 
+    command:c SEMI commandlist:cmds 
+      {: 
+         cmds.addFirst((Term)c);
+         RESULT = cmds; 
+      :}
+  | /* empty */ 
+      {: RESULT = new LinkedList(); :}
+  | error:e 
+      {: parser.report_error("Syntax error, skipped nonsense", e); :}
 ;
 
 command ::= 
-  term:t {: System.out.println(t); RESULT = t; :}
-  | error:e {: parser.report_error("Syntax error, skipped nonsense", e); :}
+    term:t 
+      {: RESULT = t; :}
+  | error:e 
+      {: parser.report_error("Syntax error, skipped nonsense", e); :}
 ;
 
-term ::= appterm:t {: RESULT = t; :}
+term ::= 
+    appterm:t 
+      {: RESULT = t; :}
   | IF term:t1 THEN term:t2 ELSE term:t3 
-     {: RESULT = new TmIf((Term)t1, (Term)t2, (Term)t3); :}
+      {: RESULT = new TmIf((Term)t1, (Term)t2, (Term)t3); :}
 ;
 
 appterm ::=
