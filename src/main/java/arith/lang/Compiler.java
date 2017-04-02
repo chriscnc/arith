@@ -37,7 +37,7 @@ public class Compiler {
             throw new NoRuleApplies(); 
         }
         public boolean isNumerical() { return true; }
-        public boolean isVal() { return isNumerical(); }
+        public boolean isVal() { return true; }
         public String toString() { return "0"; }
     }
 
@@ -64,7 +64,7 @@ public class Compiler {
         }
 
         public boolean isNumerical() { return false; }
-        public boolean isVal() { return isNumerical(); }
+        public boolean isVal() { return false; }
     }
 
     static class TmSucc implements Term {
@@ -78,7 +78,19 @@ public class Compiler {
         }
 
         public boolean isNumerical() { return t1.isNumerical(); }
-        public boolean isVal() { return isNumerical(); }
+        public boolean isVal() { return t1.isNumerical(); }
+
+        public String toString() {
+            return String.format("%d", TmSucc.toNumber(this, 0));
+        }
+
+        public static int toNumber(Term t, int n) {
+            if(t instanceof TmZero) {
+                return 0;
+            } else /*(t instanceof TmSucc)*/ {
+                return toNumber(((TmSucc)t).t1, n + 1);
+            }
+        }
     }
 
     static class TmPred implements Term {
@@ -99,7 +111,7 @@ public class Compiler {
         }
 
         public boolean isNumerical() { return false; }
-        public boolean isVal() { return isNumerical(); }
+        public boolean isVal() { return false; }
     }
 
     static class TmIsZero implements Term {
@@ -120,22 +132,8 @@ public class Compiler {
         }
 
         public boolean isNumerical() { return false; }
-        public boolean isVal() { return isNumerical(); }
-    }
-
-    static class TmTopLevel implements Term {
-        LinkedList<Term> tl;
-        public TmTopLevel(LinkedList<Term> tl) {
-            this.tl = tl;
-        }
-        public Term eval1() {
-            System.out.println(tl.size());
-            return null;
-        }
-        public boolean isNumerical() { return false; }
         public boolean isVal() { return false; }
     }
-
 
     public static void printTokens(FileReader r) throws Exception {
         Lexer l = new Lexer(r);
@@ -148,21 +146,25 @@ public class Compiler {
 
     public static Term interpTerm(Term t) {
         try {
-            Term tp = t.eval1();
+            Term tp = t.eval1(); // take a step
             return interpTerm(tp);
         } catch(NoRuleApplies e) {
             System.out.println(t);
+            return t;
         }
-        return null;
     }
 
     public static void interp(FileReader r) throws Exception {
         Parser p = new Parser(r);
         Symbol s = p.parse();
-//        System.out.println(s);
         LinkedList<Term> cmds = (LinkedList)s.value;
+        LinkedList<Term> evaldCmds = new LinkedList();
+
+        for(Term t : cmds) {
+            evaldCmds.add(interpTerm(t));
+        }
         System.out.println(cmds);
-//        ast.eval1();
+        System.out.println(evaldCmds);
        
     //    interpTerm(ast);
     }

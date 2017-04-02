@@ -1,1 +1,1 @@
-true;
+succ 0;

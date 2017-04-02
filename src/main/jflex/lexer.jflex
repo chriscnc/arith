@@ -30,30 +30,30 @@ InputCharacter = [^\r\n]
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
 /* comments */
-Comment = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
-
-TraditionalComment = "/*" [^*] ~"*/" | "*" "*"+ "/"
+Comment              = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
+TraditionalComment   = "/*" [^*] ~"*/" | "*" "*"+ "/"
 // Comment can be the last line of the file, without line terminator.
 EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-DecIntegerLiteral = 0 | [1-9][0-9]*
+DecIntegerLiteral    = 0 | [1-9][0-9]*
 
 %%
 
 <YYINITIAL> {
   /* literals */
   "true"                { return symbol(sym.TRUE); }
-  "false"                { return symbol(sym.FALSE); }
-  "if"                { return symbol(sym.IF); }
+  "false"               { return symbol(sym.FALSE); }
+  "if"                  { return symbol(sym.IF); }
   "then"                { return symbol(sym.THEN); }
   "else"                { return symbol(sym.ELSE); }
   "succ"                { return symbol(sym.SUCC); }
   "pred"                { return symbol(sym.PRED); }
-  ";"                { return symbol(sym.SEMI); }
-  "("                { return symbol(sym.LPAREN); }
-  ")"                { return symbol(sym.RPAREN); }
+  "iszero"              { return symbol(sym.ISZERO); }
+  ";"                   { return symbol(sym.SEMI); }
+  "("                   { return symbol(sym.LPAREN); }
+  ")"                   { return symbol(sym.RPAREN); }
   {DecIntegerLiteral}   { return symbol(sym.INTV, Integer.parseInt(yytext())); }
 
   {Comment}             { /* ignore */ }
