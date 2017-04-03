@@ -8,6 +8,7 @@ public class Compiler {
 
     interface Term {
         Term eval1() throws NoRuleApplies;
+        void traverse();
         boolean isNumerical();
         boolean isVal();
     }
@@ -18,6 +19,10 @@ public class Compiler {
         public Term eval1() throws NoRuleApplies { 
             throw new NoRuleApplies(); 
         }
+        
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+        }
         public boolean isNumerical() { return false; }
         public boolean isVal() { return true; }
         public String toString() { return "true"; }
@@ -27,6 +32,9 @@ public class Compiler {
         public Term eval1() throws NoRuleApplies { 
             throw new NoRuleApplies(); 
         }
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+        }
         public boolean isNumerical() { return false; }
         public boolean isVal() { return true; }
         public String toString() { return "false"; }
@@ -35,6 +43,9 @@ public class Compiler {
     static class TmZero implements Term {
         public Term eval1() throws NoRuleApplies { 
             throw new NoRuleApplies(); 
+        }
+        public void traverse() {
+            System.out.println(this.getClass().getName());
         }
         public boolean isNumerical() { return true; }
         public boolean isVal() { return true; }
@@ -52,6 +63,12 @@ public class Compiler {
             this.t3 = t3;
         }
 
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+            t1.traverse();
+            t2.traverse();
+            t3.traverse();
+        }
         public Term eval1() throws NoRuleApplies {
             if(t1 instanceof TmTrue) { 
                 return t2;
@@ -77,18 +94,23 @@ public class Compiler {
             return new TmSucc(t1p);
         }
 
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+            t1.traverse();
+        }
+
         public boolean isNumerical() { return t1.isNumerical(); }
         public boolean isVal() { return t1.isNumerical(); }
 
         public String toString() {
-            return String.format("%d", TmSucc.toNumber(this, 0));
+            return String.format("%d", TmSucc.toNumber(this));
         }
 
-        public static int toNumber(Term t, int n) {
-            if(t instanceof TmZero) {
+        public static int toNumber(Term t) {
+            if(t instanceof TmSucc) {
+                return 1 + toNumber(((TmSucc)t).t1);
+            } else {
                 return 0;
-            } else /*(t instanceof TmSucc)*/ {
-                return toNumber(((TmSucc)t).t1, n + 1);
             }
         }
     }
@@ -110,6 +132,10 @@ public class Compiler {
             }
         }
 
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+            t1.traverse();
+        }
         public boolean isNumerical() { return false; }
         public boolean isVal() { return false; }
     }
@@ -118,6 +144,10 @@ public class Compiler {
         Term t1;
         public TmIsZero(Term t1) {
             this.t1 = t1;
+        }
+        public void traverse() {
+            System.out.println(this.getClass().getName());
+            t1.traverse();
         }
 
         public Term eval1() throws NoRuleApplies { 
@@ -149,7 +179,6 @@ public class Compiler {
             Term tp = t.eval1(); // take a step
             return interpTerm(tp);
         } catch(NoRuleApplies e) {
-            System.out.println(t);
             return t;
         }
     }
@@ -158,15 +187,18 @@ public class Compiler {
         Parser p = new Parser(r);
         Symbol s = p.parse();
         LinkedList<Term> cmds = (LinkedList)s.value;
-        LinkedList<Term> evaldCmds = new LinkedList();
 
         for(Term t : cmds) {
-            evaldCmds.add(interpTerm(t));
+//            System.out.println("-------------------------");
+//            System.out.println("before...");
+//            t.traverse();
+//            Term t1 = interpTerm(t);
+            System.out.println(interpTerm(t));
+//            System.out.println("after...");
+//            t1.traverse();
+//            System.out.println("result...");
+//            System.out.println(t1);
         }
-        System.out.println(cmds);
-        System.out.println(evaldCmds);
-       
-    //    interpTerm(ast);
     }
 
     public static void main(String[] args) throws Exception {
