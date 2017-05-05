@@ -62,5 +62,7 @@ DecIntegerLiteral    = 0 | [1-9][0-9]*
 }
 
 /* error fallback */
-/*[^]                { throw new Error("Illegal character <" + yytext()+">"); }*/
-[^]                { /* ignore */ }
+[^]                { String msg = String.format("Illegal character '%s' found at line: %d, col: %d",
+                                    yytext(), yyline, yycolumn);
+                     throw new Error(msg); }
+//[^]                { /* ignore */ }

@@ -39,15 +39,13 @@ commandlist ::=
       :}
   | /* empty */ 
       {: RESULT = new LinkedList(); :}
-  | error:e 
-      {: parser.report_error("Syntax error, skipped nonsense", e); :}
 ;
 
 command ::= 
     term:t 
       {: RESULT = t; :}
   | error:e 
-      {: parser.report_error("Syntax error, skipped nonsense", e); :}
+      {: RESULT = new Error("Syntax error, skipped nonsense"); :}
 ;
 
 term ::= 
